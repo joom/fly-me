@@ -1,3 +1,5 @@
+var line;
+
 var src = {
     moon: document.getElementById("moon").src,
     earth: document.getElementById("earth").src,
@@ -62,60 +64,80 @@ var earth = R.image(src.earth,
     earthData.width,
     earthData.height).rotate(90);
 
+
 // Rocket
-var rocketData = {
-    width: 30,
-    height: 75,
-    firedWidth: 30,
-    firedHeight: 105,
-    dragStart: function() {
-        this.attr({
-            src: src.rocket,
-            width: rocketData.width,
-            height: rocketData.height
-        });
-        this.data("move", {x:0, y: 0});
-    },
-    dragMove: function(dx, dy) {
-        this.data("move", {
-            dx: dx,
-            dy: dy,
-            x : getCenter(rocket).x + dx,
-            y: getCenter(rocket).y + dy
-        });
-        line.attr({
-            path: ["M", getCenter(rocket).x, getCenter(rocket).y, "L", this.data("move").x, this.data("move").y]
-        })
-    },
-    dragEnd: function() {
-        this.attr({
-            src: src.rocketFire,
-            width: rocketData.firedWidth,
-            height: rocketData.firedHeight
-        });
-        console.log(this.data("move"));
-        line.attr({path: ["M", 160, 487.5, "L", 160, 487.5]});
+createRocket = function() {
+    var rocketData = {
+        width: 30,
+        height: 75,
+        firedWidth: 30,
+        firedHeight: 105,
+        dragStart: function() {
+            this.attr({
+                src: src.rocket,
+                width: rocketData.width,
+                height: rocketData.height
+            });
+            this.data("move", {x:0, y: 0});
+        },
+        dragMove: function(dx, dy) {
+            this.data("move", {
+                dx: dx,
+                dy: dy,
+                x : getCenter(rocket).x + dx,
+                y: getCenter(rocket).y + dy
+            });
+            line.attr({
+                path: ["M", getCenter(rocket).x, getCenter(rocket).y, "L", this.data("move").x, this.data("move").y]
+            })
+        },
+        dragEnd: function() {
+            this.attr({
+                src: src.rocketFire,
+                width: rocketData.firedWidth,
+                height: rocketData.firedHeight
+            });
+            console.log(this.data("move"));
+            line.attr({path: ["M", 160, 487.5, "L", 160, 487.5]});
 
-        var deg = -Math.atan(this.data("move").dx / this.data("move").dy) * (180/3.1415);
+            var deg = -Math.atan(this.data("move").dx / this.data("move").dy) * (180/3.1415);
 
-        rocket.animate({
-            transform: "r" + deg + "T" + this.data("move").dx + "," + this.data("move").dy + "s0.5"
-        }, 1500, ">", function() {
-            console.log(Raphael.isBBoxIntersect(rocket.getBBox(), moon.getBBox()))
+            rocket.animate({
+                transform: "r" + deg + "T" + this.data("move").dx + "," + this.data("move").dy + "s0.5"
+            }, 1500, ">", function() {
+                if(Raphael.isBBoxIntersect(rocket.getBBox(), moon.getBBox())) {
+                    alert("Landed!");
+                    rocket.remove()
+                    createRocket()
+                } else {
+                    rocket.animate({transform:"...s0T"+this.data("move").dx + "," + this.data("move").dy}, 2500, "linear", function() {
+                        rocket.hide();
+                        rocket.remove()
+                        createRocket()
+                    });
+                    
+                }
+
+            });
+        }
+    };
+
+    var rocket = R.image(src.rocket,
+        screen.width / 2 - rocketData.width / 2,
+        450,
+        rocketData.width,
+        rocketData.height)
+            .rotate(0)
+            .drag(rocketData.dragMove, rocketData.dragStart, rocketData.dragEnd);
+
+    if(typeof line === 'undefined') {
+        line = R.path(["M", getCenter(rocket).x, getCenter(rocket).y, "L", getCenter(rocket).x, getCenter(rocket).y]).attr({
+            'stroke': "orange",
+            'stroke-width': 3,
+            'opacity': 0.7
         });
     }
-};
+}
 
-var rocket = R.image(src.rocket,
-    screen.width / 2 - rocketData.width / 2,
-    450,
-    rocketData.width,
-    rocketData.height)
-        .rotate(0)
-        .drag(rocketData.dragMove, rocketData.dragStart, rocketData.dragEnd);
+createRocket()
 
-var line = R.path(["M", getCenter(rocket).x, getCenter(rocket).y, "L", getCenter(rocket).x, getCenter(rocket).y]).attr({
-    'stroke': "orange",
-    'stroke-width': 3,
-    'opacity': 0.7
-});
