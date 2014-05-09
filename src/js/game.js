@@ -1,7 +1,8 @@
 var src = {
     moon: document.getElementById("moon").src,
     earth: document.getElementById("earth").src,
-    rocket: document.getElementById("rocket").src
+    rocket: document.getElementById("rocket").src,
+    rocketFire: document.getElementById("rocketFired").src
 };
 
 document.getElementById("holder").innerHTML = "";
@@ -23,6 +24,14 @@ var population = {
 var changePopulation = function(n) {
     population.num.attr({text: n + parseInt(population.num.attr("text"))});
 }
+
+var getCenter = function(obj) {
+    var d = obj.getPointAtLength();
+    return {
+        x: d.x + (obj.attr("width") / 2),
+        y: d.y + (obj.attr("height") / 2)
+    };
+};
 
 var spin = Raphael.animation({
     transform: "r360"
@@ -56,10 +65,49 @@ var earth = R.image(src.earth,
 // Rocket
 var rocketData = {
     width: 30,
-    height: 75
+    height: 75,
+    firedWidth: 30,
+    firedHeight: 105,
+    dragStart: function() {
+        this.attr({
+            src: src.rocket,
+            width: rocketData.width,
+            height: rocketData.height
+        });
+        this.data("move", {x:0, y: 0});
+    },
+    dragMove: function(dx, dy) {
+        this.data("move", {
+            dx: dx,
+            dy: dy,
+            x : getCenter(rocket).x + dx,
+            y: getCenter(rocket).y + dy
+        });
+        line.attr({
+            path: ["M", getCenter(rocket).x, getCenter(rocket).y, "L", this.data("move").x, this.data("move").y]
+        })
+    },
+    dragEnd: function() {
+        this.attr({
+            src: src.rocketFire,
+            width: rocketData.firedWidth,
+            height: rocketData.firedHeight
+        });
+        console.log(this.data("move"));
+        line.attr({path: ["M", 160, 487.5, "L", 160, 487.5]})
+    }
 };
+
 var rocket = R.image(src.rocket,
     screen.width / 2 - rocketData.width / 2,
     450,
     rocketData.width,
-    rocketData.height).rotate(0);
+    rocketData.height)
+        .rotate(0)
+        .drag(rocketData.dragMove, rocketData.dragStart, rocketData.dragEnd);
+
+var line = R.path(["M", getCenter(rocket).x, getCenter(rocket).y, "L", getCenter(rocket).x, getCenter(rocket).y]).attr({
+    'stroke': "orange",
+    'stroke-width': 3,
+    'opacity': 0.7
+});
