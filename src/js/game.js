@@ -98,7 +98,11 @@ var rocketData = {
 
         var deg = -Math.atan(this.data("move").dx / this.data("move").dy) * (180/3.1415);
 
-        rocket.animate({transform:"r"+deg+"T"+this.data("move").dx+","+this.data("move").dy+"s0.6"}, 1000);
+        rocket.animate({
+            transform: "r" + deg + "T" + this.data("move").dx + "," + this.data("move").dy + "s0.5"
+        }, 1500, ">", function() {
+            console.log(Raphael.isBBoxIntersect(rocket.getBBox(), moon.getBBox()))
+        });
     }
 };
 
