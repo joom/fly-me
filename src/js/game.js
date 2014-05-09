@@ -94,7 +94,11 @@ var rocketData = {
             height: rocketData.firedHeight
         });
         console.log(this.data("move"));
-        line.attr({path: ["M", 160, 487.5, "L", 160, 487.5]})
+        line.attr({path: ["M", 160, 487.5, "L", 160, 487.5]});
+
+        var deg = -Math.atan(this.data("move").dx / this.data("move").dy) * (180/3.1415);
+
+        rocket.animate({transform:"r"+deg+"T"+this.data("move").dx+","+this.data("move").dy+"s0.6"}, 1000);
     }
 };
 
