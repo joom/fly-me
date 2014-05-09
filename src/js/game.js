@@ -1,5 +1,7 @@
 var src = {
-    moon: document.getElementById("moon").src
+    moon: document.getElementById("moon").src,
+    earth: document.getElementById("earth").src,
+    rocket: document.getElementById("rocket").src
 };
 
 document.getElementById("holder").innerHTML = "";
@@ -26,10 +28,11 @@ var spin = Raphael.animation({
     transform: "r360"
 }, 11000).repeat(Infinity);
 
+// Moon
 var moonData = {
     width: 65,
     height: 65
-}
+};
 var moon = R.image(src.moon,
     screen.width / 2 - moonData.width / 2,
     70,
@@ -37,3 +40,26 @@ var moon = R.image(src.moon,
     moonData.height);
 
 moon.animate(spin);
+
+
+// Earth
+var earthData = {
+    width: 177,
+    height: 177
+};
+var earth = R.image(src.earth,
+    screen.width / 2 - earthData.width / 2,
+    500,
+    earthData.width,
+    earthData.height).rotate(90);
+
+// Rocket
+var rocketData = {
+    width: 30,
+    height: 75
+};
+var rocket = R.image(src.rocket,
+    screen.width / 2 - rocketData.width / 2,
+    450,
+    rocketData.width,
+    rocketData.height).rotate(0);
