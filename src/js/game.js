@@ -17,8 +17,13 @@ var screen = {
 
 var R = Raphael("holder", screen.width, screen.height);
 
-var labelData = {font: "15px Helvetica Neue", fill: "white"};
-var numData = {font: "15px HelveticaNeue-UltraLight"};
+var labelData = {
+    font: "15px Helvetica Neue",
+    fill: "white"
+};
+var numData = {
+    font: "15px HelveticaNeue-UltraLight"
+};
 var population = {
     label: R.text(42, 12, "Population").attr(labelData),
     num: R.text(100, 12, "0").attr(labelData).attr(numData)
@@ -44,7 +49,9 @@ function toCoords(center, radius, angle) {
 }
 
 var changePopulation = function(n) {
-    population.num.attr({text: n + parseInt(population.num.attr("text"))});
+    population.num.attr({
+        text: n + parseInt(population.num.attr("text"))
+    });
 }
 
 var getCenter = function(obj) {
@@ -76,7 +83,7 @@ var halfCircle = R.path(arc([screen.width / 2, 73 + (moonData.height / 2)], 65 /
     'stroke': 'gray',
     'opacity': 0.8
 });
-var upperLimit = R.path(["M", 0, 78 + (moonData.height / 2) , "L", screen.width, 78 + (moonData.height / 2)]).attr({
+var upperLimit = R.path(["M", 0, 78 + (moonData.height / 2), "L", screen.width, 78 + (moonData.height / 2)]).attr({
     'stroke': 'gray',
     'opacity': 0.5
 });
@@ -113,13 +120,16 @@ createRocket = function() {
                 width: rocketData.width,
                 height: rocketData.height
             });
-            this.data("move", {x:0, y: 0});
+            this.data("move", {
+                x: 0,
+                y: 0
+            });
         },
         dragMove: function(dx, dy) {
             this.data("move", {
                 dx: dx,
                 dy: dy,
-                x : getCenter(rocket).x + dx,
+                x: getCenter(rocket).x + dx,
                 y: getCenter(rocket).y + dy
             });
             line.attr({
@@ -139,30 +149,29 @@ createRocket = function() {
             console.log(arcIntersection.length);
             console.log(limitIntersection.length);
 
-            line.attr({path: ["M", 160, 487.5, "L", 160, 487.5]});
+            line.attr({
+                path: ["M", 160, 487.5, "L", 160, 487.5]
+            });
 
-            var deg = -Math.atan(this.data("move").dx / this.data("move").dy) * (180/3.1415);
-
-            //if(arcIntersection.length > 1 && limitIntersection.length < 1) 
+            var deg = -Math.atan(this.data("move").dx / this.data("move").dy) * (180 / 3.1415);
 
             rocket.animate({
                 transform: "r" + deg + "T" + this.data("move").dx + "," + this.data("move").dy + "s0.5"
             }, 1500, ">", function() {
-                if(arcIntersection.length === 1 && limitIntersection.length === 0) {
-
-
+                if (arcIntersection.length === 1 && limitIntersection.length === 0) {
+                    drawTower(arcIntersection[0]);
                     changePopulation(100);
                     rocket.remove()
                     createRocket();
                 } else {
-                    rocket.animate({transform:"...s0T"+this.data("move").dx + "," + this.data("move").dy}, 2500, "linear", function() {
+                    rocket.animate({
+                        transform: "...s0T" + this.data("move").dx + "," + this.data("move").dy
+                    }, 2500, "linear", function() {
                         rocket.hide();
                         rocket.remove();
                         createRocket();
                     });
-                    
                 }
-
             });
         }
     };
@@ -172,16 +181,26 @@ createRocket = function() {
         450,
         rocketData.width,
         rocketData.height)
-            .rotate(0)
-            .drag(rocketData.dragMove, rocketData.dragStart, rocketData.dragEnd);
+        .rotate(0)
+        .drag(rocketData.dragMove, rocketData.dragStart, rocketData.dragEnd);
 
-    if(typeof line === 'undefined') {
+    if (typeof line === 'undefined') {
         line = R.path(["M", getCenter(rocket).x, getCenter(rocket).y, "L", getCenter(rocket).x, getCenter(rocket).y]).attr({
             'stroke': "orange",
             'stroke-width': 3,
             'opacity': 0.7
         });
     }
+}
+
+var drawTower = function(where) {
+    console.log(where);
+
+    var tower = R.image(src.tower,
+                        where.x-(16/2),
+                        where.y-(27/2),
+                        16,
+                        27).rotate(180);
 }
 
 createRocket();
