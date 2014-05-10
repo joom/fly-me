@@ -65,6 +65,9 @@ var getCenter = function(obj) {
 var spin = Raphael.animation({
     transform: "r360"
 }, 11000).repeat(Infinity);
+var towerspin = Raphael.animation({
+    transform: "r360"
+}, 9000).repeat(Infinity);
 
 // Moon
 var moonData = {
@@ -79,13 +82,14 @@ var moon = R.image(src.moon,
 
 moon.animate(spin);
 
-var halfCircle = R.path(arc([screen.width / 2, 73 + (moonData.height / 2)], 65 / 2 + 6, 0, 180)).attr({
+var circleCenter = [screen.width / 2, 73 + (moonData.height / 2)]
+var halfCircle = R.path(arc(circleCenter, 65 / 2 + 6, 0, 180)).attr({
     'stroke': 'gray',
-    'opacity': 0.8
+    'opacity': 0.0
 });
 var upperLimit = R.path(["M", 0, 78 + (moonData.height / 2), "L", screen.width, 78 + (moonData.height / 2)]).attr({
     'stroke': 'gray',
-    'opacity': 0.5
+    'opacity': 0.0
 });
 
 // (function swingRight(){
@@ -146,9 +150,6 @@ createRocket = function() {
             var arcIntersection = Raphael.pathIntersection(line.attr("path"), halfCircle.attr("path"));
             var limitIntersection = Raphael.pathIntersection(line.attr("path"), upperLimit.attr("path"));
 
-            console.log(arcIntersection.length);
-            console.log(limitIntersection.length);
-
             line.attr({
                 path: ["M", 160, 487.5, "L", 160, 487.5]
             });
@@ -164,6 +165,9 @@ createRocket = function() {
                     rocket.remove()
                     createRocket();
                 } else {
+                    if(limitIntersection.length === 0) {
+                        rocket.toBack();
+                    }
                     rocket.animate({
                         transform: "...s0T" + this.data("move").dx + "," + this.data("move").dy
                     }, 2500, "linear", function() {
@@ -193,14 +197,20 @@ createRocket = function() {
     }
 }
 
+var towers = R.set();
+
 var drawTower = function(where) {
     console.log(where);
 
-    var tower = R.image(src.tower,
+    var ang = 90 + ( Math.atan2(where.y-circleCenter[1],where.x-circleCenter[0]) * 180/Math.PI + 360 ) % 360
+    tower = R.image(src.tower,
                         where.x-(16/2),
                         where.y-(27/2),
                         16,
-                        27).rotate(180);
+                        27).transform("r" + ang);
+    towers.push(tower);
+    //towers.animate(spin);
+    //towers.rotate(45, screen.width, 70 - (moonData.height / 2))
 }
 
 createRocket();
