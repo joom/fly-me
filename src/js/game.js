@@ -4,7 +4,8 @@ var src = {
     moon: document.getElementById("moon").src,
     earth: document.getElementById("earth").src,
     rocket: document.getElementById("rocket").src,
-    rocketFire: document.getElementById("rocketFired").src
+    rocketFire: document.getElementById("rocketFired").src,
+    tower: document.getElementById("tower").src
 };
 
 document.getElementById("holder").innerHTML = "";
@@ -22,6 +23,25 @@ var population = {
     label: R.text(42, 12, "Population").attr(labelData),
     num: R.text(100, 12, "0").attr(labelData).attr(numData)
 };
+
+function arc(center, radius, startAngle, endAngle) {
+    angle = startAngle;
+    coords = toCoords(center, radius, angle);
+    path = "M " + coords[0] + " " + coords[1];
+    while (angle <= endAngle) {
+        coords = toCoords(center, radius, angle);
+        path += " L " + coords[0] + " " + coords[1];
+        angle += 1;
+    }
+    return path;
+}
+
+function toCoords(center, radius, angle) {
+    var radians = (angle / 180) * Math.PI;
+    var x = center[0] + Math.cos(radians) * radius;
+    var y = center[1] + Math.sin(radians) * radius;
+    return [x, y];
+}
 
 var changePopulation = function(n) {
     population.num.attr({text: n + parseInt(population.num.attr("text"))});
@@ -51,6 +71,21 @@ var moon = R.image(src.moon,
     moonData.height);
 
 moon.animate(spin);
+
+var halfCircle = R.path(arc([screen.width / 2, 73 + (moonData.height / 2)], 65 / 2 + 6, 0, 180)).attr({
+    'stroke': 'gray',
+    'opacity': 0.8
+});
+var upperLimit = R.path(["M", 0, 78 + (moonData.height / 2) , "L", screen.width, 78 + (moonData.height / 2)]).attr({
+    'stroke': 'gray',
+    'opacity': 0.5
+});
+
+// (function swingRight(){
+//   moon.animate({'transform': "T30,5"}, 1000, '<>', function () {
+//     moon.animate({'transform': "T-30,5"}, 1000, '<>', swingRight);
+//   });
+// }());
 
 
 // Earth
@@ -98,22 +133,32 @@ createRocket = function() {
                 height: rocketData.firedHeight
             });
             console.log(this.data("move"));
+            var arcIntersection = Raphael.pathIntersection(line.attr("path"), halfCircle.attr("path"));
+            var limitIntersection = Raphael.pathIntersection(line.attr("path"), upperLimit.attr("path"));
+
+            console.log(arcIntersection.length);
+            console.log(limitIntersection.length);
+
             line.attr({path: ["M", 160, 487.5, "L", 160, 487.5]});
 
             var deg = -Math.atan(this.data("move").dx / this.data("move").dy) * (180/3.1415);
 
+            //if(arcIntersection.length > 1 && limitIntersection.length < 1) 
+
             rocket.animate({
                 transform: "r" + deg + "T" + this.data("move").dx + "," + this.data("move").dy + "s0.5"
             }, 1500, ">", function() {
-                if(Raphael.isBBoxIntersect(rocket.getBBox(), moon.getBBox())) {
-                    alert("Landed!");
+                if(arcIntersection.length === 1 && limitIntersection.length === 0) {
+
+
+                    changePopulation(100);
                     rocket.remove()
-                    createRocket()
+                    createRocket();
                 } else {
                     rocket.animate({transform:"...s0T"+this.data("move").dx + "," + this.data("move").dy}, 2500, "linear", function() {
                         rocket.hide();
-                        rocket.remove()
-                        createRocket()
+                        rocket.remove();
+                        createRocket();
                     });
                     
                 }
@@ -139,5 +184,4 @@ createRocket = function() {
     }
 }
 
-createRocket()
-
+createRocket();
